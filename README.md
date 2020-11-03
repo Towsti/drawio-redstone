@@ -32,7 +32,7 @@ The [conversion tool](Converter/index.html) is used to convert between a Draw.io
 
 4. Copy the output selection and paste it in a Draw.io file
 
-   ![](resources\emojiToDrawio.png)
+   ![](resources/emojiToDrawio.png)
 
    *The selection is always placed on 0,0 in the Draw.io file and overwrite any existing selection.
 
@@ -44,7 +44,7 @@ The [conversion tool](Converter/index.html) is used to convert between a Draw.io
    - Cannot contain fields/images that are not part of the redstone image/emoji library
    - Currently cannot contain rotated redstone images
 
-   ![](resources\selectionArea.png)
+   ![](resources/selectionArea.png)
 
 2. Copy <kbd>CTRL</kbd>+<kbd>C</kbd> the selection
 
