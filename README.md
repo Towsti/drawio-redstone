@@ -3,6 +3,8 @@ Redstone emoji library for Draw.io and a tool for converting Draw.io <> Discord 
 
 The redstone emojis are made by cmoa#8392.
 
+[Github page](https://towsti.github.io/drawio-redstone)
+
 ## Features
 
 - Draw.io redstone library: https://towsti.github.io/drawio-redstone/All.xml
@@ -30,7 +32,7 @@ The [conversion tool](Converter/index.html) is used to convert between a Draw.io
 
 4. Copy the output selection and paste it in a Draw.io file
 
-   ![](C:\Users\Bastiaan Metz\Documents\Projects\drawio-redstone\resources\emojiToDrawio.png)
+   ![](resources\emojiToDrawio.png)
 
    *The selection is always placed on 0,0 in the Draw.io file and overwrite any existing selection.
 
@@ -42,7 +44,7 @@ The [conversion tool](Converter/index.html) is used to convert between a Draw.io
    - Cannot contain fields/images that are not part of the redstone image/emoji library
    - Currently cannot contain rotated redstone images
 
-   ![](C:\Users\Bastiaan Metz\Documents\Projects\drawio-redstone\resources\selectionArea.png)
+   ![](resources\selectionArea.png)
 
 2. Copy <kbd>CTRL</kbd>+<kbd>C</kbd> the selection
 
@@ -54,7 +56,7 @@ The [conversion tool](Converter/index.html) is used to convert between a Draw.io
 
 6. Copy the output selection and paste it discord
 
-   ![1604429799907](C:\Users\Bastiaan Metz\AppData\Roaming\Typora\typora-user-images\1604429799907.png)
+   ![](resources/drawioToEmoji.png)
 
 ## Development
 
