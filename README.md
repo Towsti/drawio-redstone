@@ -1,16 +1,19 @@
-# drawio-redstone
+## drawio-redstone
+
 Redstone emoji library for Draw.io and a tool for converting Draw.io <> Discord emojis.  
 
 The redstone emojis are made by cmoa#8392.
 
 [Github page](https://towsti.github.io/drawio-redstone)
 
-## Features
+[Repository](https://github.com/Towsti/drawio-redstone.git)
+
+### Features
 
 - Draw.io redstone library: https://towsti.github.io/drawio-redstone/All.xml
 - [Conversion tool](Converter/index.html) for converting Draw.io selection <> Discord emojis
 
-## Draw.io library import
+### Draw.io library import
 
 1. Open an existing Draw.io file or create a new file
 2. Set the grid size to 64p
@@ -18,11 +21,11 @@ The redstone emojis are made by cmoa#8392.
 4. Use the following URL: https://towsti.github.io/drawio-redstone/All.xml
 5. Click `Open`
 
-## Converter tool
+### Converter tool
 
 The [conversion tool](Converter/index.html) is used to convert between a Draw.io selection and Discord emojis.
 
-### Emoji > Draw.io
+**Emoji > Draw.io**
 
 1. Open the conversion tool and set the conversion to "Emoji > Draw.io"
 
@@ -36,7 +39,7 @@ The [conversion tool](Converter/index.html) is used to convert between a Draw.io
 
    *The selection is always placed on 0,0 in the Draw.io file and overwrite any existing selection.
 
-## Draw.io > Emoji
+**Draw.io > Emoji**
 
 1. Select the part that will be converted
 
@@ -58,11 +61,11 @@ The [conversion tool](Converter/index.html) is used to convert between a Draw.io
 
    ![](resources/drawioToEmoji.png)
 
-## Development
+### Development
 
 **updating image library**
 
-1. Clone the [repository](https://github.com/Towsti/temp-test.git)
+1. Clone the [repository](https://github.com/Towsti/drawio-redstone.git)
 2. Modify/add/remove images in the "Emojis/All" folder
    - Images <u>must</u> be 64*64 pixels and ".png" format
 3. Create a new library from any Draw.io library from the updated "Emojis/All" folder
@@ -70,7 +73,7 @@ The [conversion tool](Converter/index.html) is used to convert between a Draw.io
 5. Update `const ALL` "in Converter/logic.js"
 6. Commit and push the changes 
 
-## TODO
+### TODO
 
 - Possibly, fork drawio-desktop and add direct support for the image library and conversion
 - Rotation table for Draw.io > emoji conversion to allow rotating images in Draw.io and a "Minimal.xml" library
