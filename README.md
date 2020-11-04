@@ -31,7 +31,7 @@ The redstone emojis are made by cmoa#8392.
 
 The [conversion tool](Converter/index.html) is used to convert between a Draw.io selection and Discord emojis.
 
-**Emoji > Draw.io**
+#### Emoji > Draw.io
 
 1. Open the conversion tool and set the conversion to "Emoji > Draw.io"
 
@@ -43,17 +43,18 @@ The [conversion tool](Converter/index.html) is used to convert between a Draw.io
 
    ![](resources/emojiToDrawio.png)
 
-   *The selection is always placed on 0,0 in the Draw.io file and overwrite any existing selection.
+   *The selection is always placed on 0,0 in the Draw.io file.
 
-**Draw.io > Emoji**
+### Draw.io > Emoji
 
 1. Select the part that will be converted
 
    - Can contain non-filled areas
    - Currently cannot contain rotated redstone images
    
+
 ![](resources/selectionArea.png)
-   
+
 2. Copy <kbd>CTRL</kbd>+<kbd>C</kbd> the selection
 
 3. Open the conversion tool and set the conversion to "Draw.io > Emoji" 
