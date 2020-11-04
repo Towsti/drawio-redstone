@@ -16,10 +16,16 @@ The redstone emojis are made by cmoa#8392.
 ### Draw.io library import
 
 1. Open an existing Draw.io file or create a new file
-2. Set the grid size to 64p
+
+2. (suggested) Set the grid size to 64p
+
 3. `File` >  `Open Library from` > `URL...`
+
 4. Use the following URL: https://towsti.github.io/drawio-redstone/All.xml
+
 5. Click `Open`
+
+   ![](resources/drawioUI.png)
 
 ### Converter tool
 
@@ -44,11 +50,10 @@ The [conversion tool](Converter/index.html) is used to convert between a Draw.io
 1. Select the part that will be converted
 
    - Can contain non-filled areas
-   - Cannot contain fields/images that are not part of the redstone image/emoji library
    - Currently cannot contain rotated redstone images
-
-   ![](resources/selectionArea.png)
-
+   
+![](resources/selectionArea.png)
+   
 2. Copy <kbd>CTRL</kbd>+<kbd>C</kbd> the selection
 
 3. Open the conversion tool and set the conversion to "Draw.io > Emoji" 
@@ -77,6 +82,5 @@ The [conversion tool](Converter/index.html) is used to convert between a Draw.io
 
 - Possibly, fork drawio-desktop and add direct support for the image library and conversion
 - Rotation table for Draw.io > emoji conversion to allow rotating images in Draw.io and a "Minimal.xml" library
-- Optimize Draw.io > emoji conversion (improve reliability for grid sizes other than 64p)
 - Discord emoji preview window
 

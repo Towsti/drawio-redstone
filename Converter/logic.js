@@ -7,6 +7,8 @@ const IMAGE_WIDTH = 64;
 const EMPTY_EMOJI = "g0";
 const EMPTY_IMAGE = "iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAJ0lEQVR4nO3BAQ0AAADCoPdPbQ43oAAAAAAAAAAAAAAAAAAAAIB3A0BAAAGP8slRAAAAAElFTkSuQmCC";
 
+const IMAGE_DICT = parseALL();	// obtain the IMAGE_DICT one time when the file is loaded
+
 
 // parse ALL and return a dictionary? containing image:emoji pairs
 // todo: optimize this if it significantly increases load times
@@ -17,27 +19,32 @@ function parseALL() {
 	const imagesParsed = JSON.parse(xmlSelection.getElementsByTagName("mxlibrary")[0].childNodes[0].data);
 	
 	// set image dictionary contents
-	var imageDict = {}
-	imagesParsed.forEach (function (imageProperties, index) {
-		
-		imageDict[imageProperties['data'].split(",")[1]] = imageProperties['title'];
-	})
+	var imageDict = {};
+	for (const imageProperties of imagesParsed) {
+		imageDict[imageProperties["title"]] = imageProperties['data'].split(",")[1];
+	}
 	
 	return imageDict;
 }
 
-const IMAGE_DICT = parseALL();	// obtain the IMAGE_DICT one time when the file is loaded
 
+// utility function to return the min and max value of a 2d array
+function getMinMaxOf2DIndex (arr, idx) {
+    return {
+        min: Math.min.apply(null, arr.map(function (e) { return e[idx]})),
+        max: Math.max.apply(null, arr.map(function (e) { return e[idx]}))
+    }
+}
 
 // swap the contents of Input_TA and Output_TA
 function swapConversion() {
   var swapBtn = document.getElementById("SwapConversion_BUT");
   
-  var a = document.getElementById("Input_TA");
-  var b = document.getElementById("Output_TA");  
+  let a = document.getElementById("Input_TA");
+  let b = document.getElementById("Output_TA");  
 
-  var swapValue = a.value;
-  var swapPlaceholder = a.placeholder;
+  const swapValue = a.value;
+  const swapPlaceholder = a.placeholder;
   
   // swap the contents of a and b
   a.value = b.value;
@@ -55,6 +62,7 @@ function swapConversion() {
   }
 }
 
+
 // start conversion
 function convert() {
 	var swapBtn = document.getElementById("SwapConversion_BUT");
@@ -67,58 +75,52 @@ function convert() {
 	}
 }
 
-// utility function to return the min and max value of a 2d array
-function getMinMaxOf2DIndex (arr, idx) {
-    return {
-        min: Math.min.apply(null, arr.map(function (e) { return e[idx]})),
-        max: Math.max.apply(null, arr.map(function (e) { return e[idx]}))
-    }
-} 
 
 // convert XML selection (copy Draw.io selection in input field) to discord emoji data
 function convertXMLToEmoji() {
-	var a = document.getElementById("Input_TA");
+	const input = document.getElementById("Input_TA");
 	
 	// decode % encoded string
-	var percentDecoded = decodeURIComponent(a.value);
+	const percentDecoded = decodeURIComponent(input.value);
 	
 	// parse XML from decoded string
-	var parser = new DOMParser();
-	var xmlSelection = parser.parseFromString(percentDecoded,"text/xml");
+	const parser = new DOMParser();
+	const xmlSelection = parser.parseFromString(percentDecoded,"text/xml");
 	
-	var mxCells = xmlSelection.getElementsByTagName("root")[0].childNodes;
+	const mxCells = xmlSelection.getElementsByTagName("root")[0].childNodes;
 	
 	// reduce the XML data to a list containing tuples jk arrays cus javascript [[x, y, image, rotation],...]
 	var attrList = [];
-	mxCells.forEach (function (mxCell, index) {
-		var style = mxCell.attributes["style"];
+	for (const mxCell of mxCells) {
+		const style = mxCell.attributes["style"];
 		
 		if (style) {
-			var styleAttributes = style.value.split(";");
-			var img = null
-			var rotation = 0
+			const styleAttributes = style.value.split(";");
+			var img = null;
+			var rotation = 0;
 			
-			styleAttributes.forEach (function (styleAttribute, index) {
-				if( styleAttribute.startsWith("image=")) {
+			for (const styleAttribute of styleAttributes) {
+				if(styleAttribute.startsWith("image=")) {
 					img = styleAttribute.split(",")[1];
 				}
 				else if (styleAttribute.startsWith("rotation")) {
 					rotation = parseInt(styleAttribute.split("=")[1]);
 				}
-			});
+			}
 		
 			// obtain geometry data (x,y position)
-			var mxGeometry = mxCell.getElementsByTagName("mxGeometry")
-			var y = parseInt(mxGeometry[0].attributes["y"].value);
-			var x = parseInt(mxGeometry[0].attributes["x"].value);
+			const mxGeometry = mxCell.getElementsByTagName("mxGeometry");
+			
+			const x = parseInt(mxGeometry[0].attributes["x"].value);
+			const y = parseInt(mxGeometry[0].attributes["y"].value);
 			
 			attrList.push([x, y, img, rotation]);
 		}
-	});
+	}
 	
 	// convert the reduced data to an image grid containing arrays cus javascript [[image, rotation,...],...]
-	var xMinMax = getMinMaxOf2DIndex(attrList, 0);
-	var yMinMax = getMinMaxOf2DIndex(attrList, 1);
+	const xMinMax = getMinMaxOf2DIndex(attrList, 0);
+	const yMinMax = getMinMaxOf2DIndex(attrList, 1);
 	var x;
 	var y;
 	
@@ -128,39 +130,84 @@ function convertXMLToEmoji() {
 		for (x = xMinMax["min"]; x <= xMinMax["max"]; x+=IMAGE_WIDTH) {
 			row.push([x, y, EMPTY_IMAGE, 0, EMPTY_EMOJI])
 		}
-		imageGrid.push(row)
+		imageGrid.push(row);
 	}
 	
-	attrList.forEach (function (attr, index) {
+	for (const attr of attrList) {
 		coordloop:
 			for (y = yMinMax["min"]; y <= yMinMax["max"]; y+=IMAGE_HEIGHT) {
 				for (x = xMinMax["min"]; x <= xMinMax["max"]; x+=IMAGE_WIDTH) {
 					if (attr[0] === x && attr[1] === y) {
-						// TODO: retract mod 64 remainder incase images are not aligned to 64p grid but they are aligned relative to each other
 						imageGrid[(y-yMinMax["min"])/IMAGE_HEIGHT][(x-xMinMax["min"])/IMAGE_WIDTH][2] = attr[2];
 						imageGrid[(y-yMinMax["min"])/IMAGE_HEIGHT][(x-xMinMax["min"])/IMAGE_WIDTH][3] = attr[3];
 						
 						// obtain the emoji name from the IMAGE_DICT
-						imageGrid[(y-yMinMax["min"])/IMAGE_HEIGHT][(x-xMinMax["min"])/IMAGE_WIDTH][4] = IMAGE_DICT[attr[2]];
+						const emojiName = Object.keys(IMAGE_DICT).find(key => IMAGE_DICT[key] === attr[2]);
+
+						imageGrid[(y-yMinMax["min"])/IMAGE_HEIGHT][(x-xMinMax["min"])/IMAGE_WIDTH][4] = emojiName;
 						break coordloop;
 					}
 				}
 			}
-	});
+	}
 	
 	// update the output with the emoji data
 	var emoji_string = "";
-	imageGrid.forEach (function (row, index) {
-		row.forEach (function (img, index2) {
+	for (const row of imageGrid) {
+		for (const img of row) {
 			emoji_string += ":" + img[4] + ":";
-		});
-		emoji_string += '\n';
-	});
+		}
+		emoji_string += "\n";
+	}
 	
 	// set the Output field
 	document.getElementById("Output_TA").value = emoji_string;
 }
 
+
 function convertEmojiToXML() {
-	console.log("Emoji to XML");
+	const input = document.getElementById("Input_TA");
+	
+	const inputArray = input.value.split(":");
+	console.log(inputArray);
+	var emojiGrid = [];
+	var row = [];
+	for (const emoji of inputArray) {
+		if (emoji != "") {
+			if (emoji === "\n") {
+				emojiGrid.push(row);
+				row = [];
+			}
+			else {
+				row.push(emoji);
+				
+			}
+		}
+	}
+	if (row.length > 0) {
+		emojiGrid.push(row);
+	}
+	
+	console.log(emojiGrid);
+	
+	const output = "%3CmxGraphModel%3E%3Croot%3E%3CmxCell%20id%3D%220%22%2F%3E%3CmxCell%20id%3D%221%22%20parent%3D%220%22%2F%3E%3CmxCell%20id%3D%222%22%20value%3D%22%22%20style%3D%22shape%3Dimage%3BverticalLabelPosition%3Dbottom%3BverticalAlign%3Dtop%3BimageAspect%3D0%3Baspect%3Dfixed%3Bimage%3Ddata%3Aimage%2Fpng%2CiVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAACSElEQVR4nO2bvyvGURTGvbIxWCRFGUwmKRYLmSzvIAaLxOY%2F8Bf4D4xiMiiDxchMyWSyUbIZ2BTz%2Bdz6Pt2op9zzbOd9v93v857Oee5zf7y9pemx74GGMegm4EYmwE3AjSF%2BMDweJeHzrRfirbXJEK%2FPTXS%2B4OLhNcRnVy%2Bdz%2F%2F1%2BOr3NF8BmQA3ATcKDajt%2BdGV%2FRB%2FPd%2FE5zH%2B5f1z5%2Fs4%2FsjMbCQ8tYzxjwa6oDSn%2BQrIBLgJuCF9gOp54uPpMcScp9nzBJ%2BnhoxCA8iHmqA0p%2FkKyAS4CbhRaEB%2FfirEquffr2PPKW%2BufMXm4V3n%2B9jj5Me4L%2Fg0XwGZADcBNwoNYE%2FS26t5nj12frAQYnp74vwgxrWawPH5e1IDgEyAm4AbhQYoL17b88pHECOI6zUhgnyJ5isgE%2BAm4EZPnQ3WnhNsb6yGmHt4CvQdBH0INUHxJZqvgEyAm4AbhQ8gVA%2FRa7NHOa9TE2p7vlxLRA1QfInmKyAT4CbgRqEB9PL00txn5zxc7PlhfGoCoXp%2Bbe80xJz3T3YXQ6zWLs1XQCbATcAN6QPo7dfnYo%2FuHN%2BGWJ3HUxOI3%2FZ8sSeI8VMDgEyAm4AbUgPo3Xk%2Bf4LnqzUBa4nanpd7jvAVRPMVkAlwE3Cj2BOsvRdI8L4ANUGt13%2Fb87X3FZqvgEyAm4AbhQ%2FQXr77jg69eH%2B%2Bez%2BBmqC8PVHb80TzFZAJcBNwo%2FAB6myN3%2FNeofqPjzrfVz5E7VEqvnlXGMgEuAm4Ie8H%2FHc0XwGZADcBN34Apo3xBMC7hRQAAAAASUVORK5CYII%3D%22%20vertex%3D%221%22%20parent%3D%221%22%3E%3CmxGeometry%20x%3D%22544%22%20y%3D%22128%22%20width%3D%2264%22%20height%3D%2264%22%20as%3D%22geometry%22%2F%3E%3C%2FmxCell%3E%3CmxCell%20id%3D%223%22%20value%3D%22%22%20style%3D%22shape%3Dimage%3BverticalLabelPosition%3Dbottom%3BverticalAlign%3Dtop%3BimageAspect%3D0%3Baspect%3Dfixed%3Bimage%3Ddata%3Aimage%2Fpng%2CiVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAACwUlEQVR4nO2bP2tUQRTFX4yaZGWNWaIk2RQaiEFQIRBsAqKNnZAmteAX8DPZ2NjoJ9DGRhaEFRKiYAi4PmHDErK4ZjVg6vMbnWGwuMXc0519szP3Xe69c%2BbPm1hfmvtTFYxz1gZYwx1gbYA1zvOHq62G8P5gJPzuov5lrT0fHWCvdyi8W59G27P%2Fh3duCJ%2BduSD81ftP0f5T71N8BLgDrA2wRlADcnO%2B2ZiODsD29fg4Oh7bfxsMlaP%2F9ZUF%2FPJdWLceVTEUHwHuAGsDrJHUAWvty8KXWk3hRz9%2BCr9yaUZ45%2FNX4f1BXAdQNzDHR%2BPTKM%2BtOcVHgDvA2gBrBDVgceqXcOY8tXiuNqeuYI4%2Ff6c1g%2FM61wbUCQTfp4%2FnxUeAO8DaAGsENWBjdVk45%2FncnH%2Byqf1NTuqQzWntj%2B3DmrAvjPP%2BrXYryruvd4QXHwHuAGsDrBHUAGp35lhuznNtkJq3qe23N1QnvOyoLqgqXTtQt7z5qDWDKD4C3AHWBlgjqAHM6XA9Hdf2uTk%2FHJ1EnzemtH%2BOF9rbE57afyg%2BAtwB1gZYI6gBBPfQCOqE4cnvLAN4rrA81%2FhHy7%2BjW3PPMW4vUXwEuAOsDbBGUAOePVoVTi1djy8KpzbnWoDanLqA%2BwHEwaHqEO4P8BzjwYqeY6TuJxQfAe4AawOsMcF7gk%2FvX5cG1OrM6Rcdau%2F4%2FQLuObL%2FVM6mcj4F1qziI8AdYG2ANQIdkFqfU%2BszB9%2BifXhHh%2Fv8bP9%2FOc%2B1Rep9io8Ad4C1AdYIakDqjg61O3MsvyYocnOeZ39cO%2FB9iOIjwB1gbYA1kucCvKOzde%2Bm8Fnk4G5vIJx3dKrE%2Ff3Ht68JZ43hOQHx4QvvCvu5QBTuAGsDrBHsB6S%2BseFz5nhqvR%2Be7ytS3ydwXuceZcpevysMuAOsDbBGUANKQ%2FER4A6wNsAaZ65qD5Hk5nXeAAAAAElFTkSuQmCC%22%20vertex%3D%221%22%20parent%3D%221%22%3E%3CmxGeometry%20x%3D%22544%22%20y%3D%22192%22%20width%3D%2264%22%20height%3D%2264%22%20as%3D%22geometry%22%2F%3E%3C%2FmxCell%3E%3CmxCell%20id%3D%224%22%20value%3D%22%22%20style%3D%22shape%3Dimage%3BverticalLabelPosition%3Dbottom%3BverticalAlign%3Dtop%3BimageAspect%3D0%3Baspect%3Dfixed%3Bimage%3Ddata%3Aimage%2Fpng%2CiVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAACUklEQVR4nO2bsU4CQRCGUa6iAUMsICGRkkICjQXGFyDxLXwDYkV8CF%2FD2JnQ0BCNWFhAsKBEg4FSsKAxRDvj%2FGtusjnlJ9n5uoHbu5%2FJzO7s3LLTvmh%2Fpn6Qy%2BVSPiwWC2FvenxSdjf6tC3EHMAWwCbCD2rVmrCXb8v4O5Tiv87uZb0EZbIZr%2BuR1XIlbNQ%2FmU6EHXwEmAPYAthEuO5izmAOJ83Ry6NjYb%2FD961uN1bPXxN8BJgD2ALYOHVA4aAQOwDXWV8w51%2BU67U6QpuTHL1TaQYfAeYAtgA2zhwwf5573UDLUVzHz66uva7X7q%2FNSXg%2F7D8EHwHmALYANs4c4Lt%2FRzDnBk8DYa8%2F1rHj8%2Ft5YTerTWGPR%2BPY8agfbdz7BB8B5gC2ADYRrou9256w64d1YWt7heFoKGzMucfWubC1fgDiW3fgHIQEHwHmALYANk5PEMEc0nJQe9fn2w%2BYTWfCLpaKwsa6APVqvy%2F4CDAHsAWwcfYCmMPNU1mL4%2F4b132N17S0079f9g2u6zgHIKi3c9MRtu0FAHMAWwCbqHHSiL0Ae4RYB2z6jA%2FWBZVqRdhYF%2BCcgAQfAeYAtgA2Uf%2BuLz4ol8rCxpzX1n0cj2dykqLVBagX5zA7IwSYA9gC2Dg9Qe3cH%2FtsL4J1AZ4XsHeDCuYAtgA2Tk%2FQ990grvvbhr0bVDAHsAWwcXqC2hkdbX%2BtncvzxfessvZ%2FAST4CDAHsAWw%2BfezwthzbDzce43Xnp%2F0%2FwTBR4A5gC2AjTMHYI9QY9v6A4imL%2FgIMAewBbD5AplKySvlsTGyAAAAAElFTkSuQmCC%22%20vertex%3D%221%22%20parent%3D%221%22%3E%3CmxGeometry%20x%3D%22480%22%20y%3D%22128%22%20width%3D%2264%22%20height%3D%2264%22%20as%3D%22geometry%22%2F%3E%3C%2FmxCell%3E%3C%2Froot%3E%3C%2FmxGraphModel%3E";
+
+	
+	// decode % encoded string
+	const percentDecoded = decodeURIComponent(output);
+	console.log(percentDecoded);
+	
+	const percentEncoded = encodeURIComponent(percentDecoded);
+	console.log(percentEncoded)
+
+	// parse XML from decoded string
+	const parser = new DOMParser();
+	const xmlSelection = parser.parseFromString(percentDecoded,"text/xml");
+
+	var mxCells = xmlSelection.getElementsByTagName("root")[0].childNodes;
+	
+	
+	//var doc = document.implementation.createDocument("", "", null);
+	var test = "33";
+	mxCells.appendChild(test);
 }
